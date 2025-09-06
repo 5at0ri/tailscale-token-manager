@@ -15,8 +15,6 @@ A lightweight Docker container that manages OAuth tokens for Tailscale API acces
 ### Using Docker Compose (Recommended)
 
 ```yaml
-version: '3.8'
-
 services:
   tailscale-token-manager:
     image: ghcr.io/5at0ri/tailscale-token-manager:latest
