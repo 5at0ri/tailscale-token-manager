@@ -1,0 +1,44 @@
+# Example Glance configuration using Tailscale Token Manager
+server:
+  port: 8080
+
+pages:
+  - name: Home
+    columns:
+      - size: small
+        widgets:
+          - type: weather
+            location: London, United Kingdom
+
+      - size: full
+        widgets:
+          - type: chart
+            title: Tailscale Devices
+            chart-type: line
+            url: http://tailscale-token-manager:1180/devices
+            values:
+              - type: object-array
+                title: Online Devices
+                key: devices
+                color: 37, 99, 235
+                filters:
+                  - type: contains
+                    key: .lastSeen
+                    search: "online"
+
+          - type: markets
+            title: Markets
+            sort-by: absolute-change
+            stocks:
+              - symbol: SPY
+                name: S&P 500
+              - symbol: BTC-USD
+                name: Bitcoin
+              - symbol: AAPL
+                name: Apple
+
+      - size: small
+        widgets:
+          - type: calendar
+            title: Calendar
+            previous-days: 14
