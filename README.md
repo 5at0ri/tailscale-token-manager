@@ -123,7 +123,7 @@ The container runs two main processes:
 ## Building from Source
 
 ```bash
-git clone https://github.com/suluxan/tailscale-token-manager.git
+git clone https://github.com/5at0ri/tailscale-token-manager.git
 cd tailscale-token-manager
 docker build -t tailscale-token-manager .
 ```
