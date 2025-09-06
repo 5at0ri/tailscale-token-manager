@@ -9,7 +9,6 @@ A lightweight Docker container that manages OAuth tokens for Tailscale API acces
 - 🌐 **Proxy API**: Simple HTTP proxy to Tailscale API with transparent token handling
 - 🐳 **Multi-Architecture**: Supports AMD64 and ARM64 architectures
 - 📊 **Health Checks**: Built-in container health monitoring
-- 🔧 **Production Ready**: Proper error handling, logging, and retry logic
 
 ## Quick Start
 
@@ -20,7 +19,7 @@ version: '3.8'
 
 services:
   tailscale-token-manager:
-    image: ghcr.io/suluxan/tailscale-token-manager:latest
+    image: ghcr.io/5at0ri/tailscale-token-manager:latest
     container_name: tailscale-token-manager
     restart: always
     ports:
@@ -53,7 +52,7 @@ docker run -d \
   -e TAILSCALE_CLIENT_SECRET=your_client_secret_here \
   -e TZ=America/New_York \
   -v tailscale-tokens:/tokens \
-  ghcr.io/suluxan/tailscale-token-manager:latest
+  ghcr.io/5at0ri/tailscale-token-manager:latest
 ```
 
 ## Configuration
