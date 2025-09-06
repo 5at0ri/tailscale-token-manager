@@ -1,0 +1,47 @@
+name: Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t tailscale-token-manager:test .
+
+      - name: Test container starts
+        run: |
+          docker run -d --name test-container \
+            -e TAILSCALE_CLIENT_ID=test \
+            -e TAILSCALE_CLIENT_SECRET=test \
+            tailscale-token-manager:test
+          sleep 5
+          docker logs test-container
+          docker stop test-container
+          docker rm test-container
+
+      - name: Run security scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'tailscale-token-manager:test'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          severity: 'CRITICAL,HIGH'
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Lint shell scripts
+        uses: ludeeus/action-shellcheck@master
+        with:
+          check_together: 'yes'
