@@ -26,7 +26,8 @@ log() {
 # Check disk space before writing
 check_disk_space() {
     if command -v df >/dev/null 2>&1; then
-        local available_kb=$(df /tokens | tail -1 | awk '{print $4}' 2>/dev/null || echo 0)
+        local available_kb
+        available_kb=$(df /tokens | tail -1 | awk '{print $4}' 2>/dev/null || echo 0)
         if [ "$available_kb" -lt 1024 ]; then
             log "Error: Insufficient disk space (${available_kb}KB available)"
             return 1
@@ -188,7 +189,7 @@ check_token() {
             if command -v stat >/dev/null 2>&1; then
                 # Try GNU stat first, then BSD/macOS stat
                 file_time=$(stat -c %Y "$TOKEN_VALUE_FILE" 2>/dev/null || stat -f %m "$TOKEN_VALUE_FILE" 2>/dev/null || echo 0)
-                token_age=$(($(date +%s) - $file_time))
+                token_age=$(($(date +%s) - file_time))
             else
                 token_age=3001  # Force refresh if stat unavailable
             fi
