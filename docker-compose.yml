@@ -17,8 +17,10 @@ services:
       - TZ=${TZ:-UTC}
     
     volumes:
-      # Store tokens persistently (optional, tokens auto-refresh anyway)
-      - tailscale-tokens:/tokens
+      # Organized data storage like other containers
+      - ./appdata/tailscale-token-manager/data:/app/data
+      - ./appdata/tailscale-token-manager/config:/app/config
+      - ./appdata/tailscale-token-manager/logs:/app/logs
     
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:1180/devices"]
@@ -28,12 +30,7 @@ services:
       start_period: 30s
     
     # Security
-    read_only: true
     security_opt:
       - no-new-privileges:true
     tmpfs:
       - /tmp:noexec,nosuid,size=100m
-
-volumes:
-  tailscale-tokens:
-    driver: local

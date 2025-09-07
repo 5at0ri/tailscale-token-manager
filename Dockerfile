@@ -24,15 +24,18 @@ RUN addgroup -g 1000 tokenmanager && \
 COPY --chown=tokenmanager:tokenmanager src/ /usr/local/bin/
 RUN chmod +x /usr/local/bin/*.sh
 
-# Create tokens directory with proper permissions
-RUN mkdir -p /tokens && \
-    chown -R tokenmanager:tokenmanager /tokens
+# Create data directories with proper permissions
+RUN mkdir -p /app/data /app/config /app/logs && \
+    chown -R tokenmanager:tokenmanager /app
 
 # Switch to non-root user
 USER tokenmanager
 
-# Create directory for tokens
-WORKDIR /tokens
+# Working directory
+WORKDIR /app/data
+
+# Create symlink for backwards compatibility
+RUN ln -sf /app/data /tokens
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \

@@ -9,6 +9,10 @@ A lightweight Docker container that manages OAuth tokens for Tailscale API acces
 - 🌐 **Proxy API**: Simple HTTP proxy to Tailscale API with transparent token handling
 - 🐳 **Multi-Architecture**: Supports AMD64 and ARM64 architectures
 - 📊 **Health Checks**: Built-in container health monitoring
+- 🔁 **Network Resilience**: Automatic retry logic with exponential backoff
+- 💾 **Disk Space Protection**: Prevents corruption from full disks
+- 🛡️ **File Locking**: Prevents concurrent execution conflicts
+- 🧹 **Graceful Shutdown**: Clean process termination and resource cleanup
 
 ## Quick Start
 
@@ -27,21 +31,24 @@ services:
       - TAILSCALE_CLIENT_SECRET=your_client_secret_here
       - TZ=America/New_York
     volumes:
-      - tailscale-tokens:/tokens
+      - ./appdata/tailscale-token-manager/data:/app/data
+      - ./appdata/tailscale-token-manager/config:/app/config
+      - ./appdata/tailscale-token-manager/logs:/app/logs
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:1180/devices"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 30s
-
-volumes:
-  tailscale-tokens:
 ```
 
 ### Using Docker CLI
 
 ```bash
+# Create directories first
+mkdir -p ./appdata/tailscale-token-manager/{data,config,logs}
+
+# Run container
 docker run -d \
   --name tailscale-token-manager \
   --restart always \
@@ -49,7 +56,9 @@ docker run -d \
   -e TAILSCALE_CLIENT_ID=your_client_id_here \
   -e TAILSCALE_CLIENT_SECRET=your_client_secret_here \
   -e TZ=America/New_York \
-  -v tailscale-tokens:/tokens \
+  -v ./appdata/tailscale-token-manager/data:/app/data \
+  -v ./appdata/tailscale-token-manager/config:/app/config \
+  -v ./appdata/tailscale-token-manager/logs:/app/logs \
   ghcr.io/5at0ri/tailscale-token-manager:latest
 ```
 
@@ -134,6 +143,26 @@ docker build -t tailscale-token-manager .
 - Uses minimal Alpine base image
 - Regular security updates via automated builds
 
+## Data Persistence
+
+The container uses organized directories for data storage:
+
+```
+appdata/tailscale-token-manager/
+├── data/           # Token files and cache
+├── config/         # Configuration files (future use)
+└── logs/          # Application logs (future use)
+```
+
+**First Time Setup:**
+```bash
+# Create required directories
+mkdir -p ./appdata/tailscale-token-manager/{data,config,logs}
+
+# Set proper permissions (Linux/macOS)
+chown -R 1000:1000 ./appdata/tailscale-token-manager/
+```
+
 ## Troubleshooting
 
 ### Check container logs
@@ -147,11 +176,28 @@ docker logs tailscale-token-manager
 curl http://localhost:1180/devices
 ```
 
+### Permission denied errors
+
+If you see permission denied errors in logs:
+
+```bash
+# Stop the container
+docker stop tailscale-token-manager
+
+# Fix permissions
+chown -R 1000:1000 ./appdata/tailscale-token-manager/
+
+# Start the container
+docker start tailscale-token-manager
+```
+
 ### Common issues
 
 1. **"tailscale token unavailable"**: Check your OAuth credentials
 2. **Connection refused**: Verify the container is running and port is exposed
 3. **401 Unauthorized**: OAuth client may need device:read permissions
+4. **Permission denied**: Fix directory ownership with `chown -R 1000:1000`
+5. **Disk space errors**: Ensure at least 1MB free space in data directory
 
 ## Contributing
 
@@ -167,6 +213,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Support
 
-- 🐛 [Report a bug](https://github.com/suluxan/tailscale-token-manager/issues)
-- 💡 [Request a feature](https://github.com/suluxan/tailscale-token-manager/issues)
-- 💬 [Discussions](https://github.com/suluxan/tailscale-token-manager/discussions)
+- 🐛 [Report a bug](https://github.com/5at0ri/tailscale-token-manager/issues)
+- 💡 [Request a feature](https://github.com/5at0ri/tailscale-token-manager/issues)
+- 💬 [Discussions](https://github.com/5at0ri/tailscale-token-manager/discussions)
