@@ -26,16 +26,14 @@ RUN chmod +x /usr/local/bin/*.sh
 
 # Create data directories with proper permissions
 RUN mkdir -p /app/data /app/config /app/logs && \
-    chown -R tokenmanager:tokenmanager /app
+    chown -R tokenmanager:tokenmanager /app && \
+    ln -sf /app/data /tokens
 
 # Switch to non-root user
 USER tokenmanager
 
 # Working directory
 WORKDIR /app/data
-
-# Create symlink for backwards compatibility
-RUN ln -sf /app/data /tokens
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
