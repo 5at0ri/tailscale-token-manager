@@ -35,6 +35,7 @@ get_new_token() {
                 rm -f "${TOKEN_FILE}.tmp"
             else
                 # Fallback: just use the original response without expiry timestamp
+                rm -f "${TOKEN_FILE}.tmp2"  # Clean up potentially created but incomplete temp file
                 mv "${TOKEN_FILE}.tmp" "${TOKEN_FILE}"
                 log "Warning: jq failed, using token without expiry timestamp"
             fi
