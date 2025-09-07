@@ -113,11 +113,9 @@ docker build -t tailscale-token-manager .
 
 ## Security Considerations
 
-- Container runs as non-root user (`tokenmanager`)
 - Tokens are stored in memory and temporary files only
 - No sensitive data is logged
 - Uses minimal Alpine base image
-- Regular security updates via automated builds
 
 ## Data Persistence
 
