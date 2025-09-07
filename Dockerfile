@@ -25,7 +25,7 @@ COPY --chown=tokenmanager:tokenmanager src/ /usr/local/bin/
 RUN chmod +x /usr/local/bin/*.sh
 
 # Create data directories with proper permissions
-RUN mkdir -p /app/data /app/config /app/logs && \
+RUN mkdir -p /app/data && \
     chown -R tokenmanager:tokenmanager /app && \
     ln -sf /app/data /tokens
 

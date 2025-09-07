@@ -5,9 +5,7 @@ A lightweight Docker container that manages OAuth tokens for Tailscale API acces
 ## Features
 
 - 🔄 **Automatic Token Refresh**: Manages OAuth token lifecycle with automatic renewal
-- 🔒 **Secure**: Runs as non-root user with minimal attack surface
 - 🌐 **Proxy API**: Simple HTTP proxy to Tailscale API with transparent token handling
-- 🐳 **Multi-Architecture**: Supports AMD64 and ARM64 architectures
 - 📊 **Health Checks**: Built-in container health monitoring
 - 🔁 **Network Resilience**: Automatic retry logic with exponential backoff
 - 💾 **Disk Space Protection**: Prevents corruption from full disks
@@ -29,11 +27,9 @@ services:
     environment:
       - TAILSCALE_CLIENT_ID=your_client_id_here
       - TAILSCALE_CLIENT_SECRET=your_client_secret_here
-      - TZ=America/New_York
+      - TZ=Europe/London
     volumes:
-      - ./appdata/tailscale-token-manager/data:/app/data
-      - ./appdata/tailscale-token-manager/config:/app/config
-      - ./appdata/tailscale-token-manager/logs:/app/logs
+      - ./appdata/tailscale-token-manager:/app/data
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:1180/devices"]
       interval: 30s
@@ -93,26 +89,6 @@ Proxies requests to Tailscale's device API with automatic token management.
 curl http://localhost:1180/devices
 ```
 
-## Integration Examples
-
-### Glance Dashboard
-
-```yaml
-- type: chart
-  title: Tailscale Devices
-  url: http://tailscale-token-manager:1180/devices
-```
-
-### Home Assistant
-
-```yaml
-sensor:
-  - platform: rest
-    name: tailscale_devices
-    resource: http://tailscale-token-manager:1180/devices
-    json_attributes_path: "$.devices"
-```
-
 ## Architecture
 
 The container runs two main processes:
@@ -145,19 +121,12 @@ docker build -t tailscale-token-manager .
 
 ## Data Persistence
 
-The container uses organized directories for data storage:
-
-```
-appdata/tailscale-token-manager/
-├── data/           # Token files and cache
-├── config/         # Configuration files (future use)
-└── logs/          # Application logs (future use)
-```
+  The container stores token files in a single data directory:
 
 **First Time Setup:**
 ```bash
 # Create required directories
-mkdir -p ./appdata/tailscale-token-manager/{data,config,logs}
+mkdir -p ./appdata/tailscale-token-manager
 
 # Set proper permissions (Linux/macOS)
 chown -R 1000:1000 ./appdata/tailscale-token-manager/
