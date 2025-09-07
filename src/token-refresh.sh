@@ -46,13 +46,23 @@ get_new_token() {
         fi
         
         # Extract just the token value for easy access (atomic, no trailing newline)
-        access_token=$(jq -r '.access_token' "${TOKEN_FILE}" 2>/dev/null)
+        if command -v jq >/dev/null 2>&1; then
+            access_token=$(jq -r '.access_token' "${TOKEN_FILE}" 2>/dev/null)
+        else
+            access_token=""
+        fi
         if [ -n "$access_token" ]; then
             tmp_token_file="${TOKEN_VALUE_FILE}.tmp"
             # Write without newline and atomically replace the token file
-            printf "%s" "$access_token" > "$tmp_token_file" 2>/dev/null && mv "$tmp_token_file" "${TOKEN_VALUE_FILE}"
-            log "Token refreshed successfully"
-            return 0
+            if printf "%s" "$access_token" > "$tmp_token_file" && [ -f "$tmp_token_file" ]; then
+                mv "$tmp_token_file" "${TOKEN_VALUE_FILE}"
+                log "Token refreshed successfully"
+                return 0
+            else
+                log "Error: Failed to write token value to temp file"
+                rm -f "$tmp_token_file"
+                return 1
+            fi
         else
             log "Error: Failed to extract token value"
             return 1
@@ -71,7 +81,11 @@ check_token() {
     fi
     
     # Check if we have an expiry timestamp
-    expires_at=$(jq -r '.expires_at // empty' "$TOKEN_FILE" 2>/dev/null)
+    if command -v jq >/dev/null 2>&1; then
+        expires_at=$(jq -r '.expires_at // empty' "$TOKEN_FILE" 2>/dev/null)
+    else
+        expires_at=""
+    fi
     current_time=$(date +%s)
     
     if [ -n "$expires_at" ] && [ "$expires_at" -gt 0 ]; then
@@ -121,11 +135,20 @@ else
     log "Token is valid, no refresh needed"
     # Ensure token_value file exists and is normalized (no trailing newline)
     if [ -f "$TOKEN_FILE" ]; then
-        access_token=$(jq -r '.access_token' "${TOKEN_FILE}" 2>/dev/null)
+        if command -v jq >/dev/null 2>&1; then
+            access_token=$(jq -r '.access_token' "${TOKEN_FILE}" 2>/dev/null)
+        else
+            access_token=""
+        fi
         if [ -n "$access_token" ]; then
             tmp_token_file="${TOKEN_VALUE_FILE}.tmp"
-            printf "%s" "$access_token" > "$tmp_token_file" 2>/dev/null && mv "$tmp_token_file" "${TOKEN_VALUE_FILE}"
-            log "Token value normalized"
+            if printf "%s" "$access_token" > "$tmp_token_file" && [ -f "$tmp_token_file" ]; then
+                mv "$tmp_token_file" "${TOKEN_VALUE_FILE}"
+                log "Token value normalized"
+            else
+                log "Warning: Failed to write normalized token value"
+                rm -f "$tmp_token_file"
+            fi
         fi
     fi
 fi
